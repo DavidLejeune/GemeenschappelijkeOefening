@@ -2,7 +2,8 @@
 # -----------
 # Active Directory Management tool
 # Created for Task1 Operating Systems Windows 2 @ Vives
-#
+# Adapted for the common task Linux/Windows/Networking
+
 # Author : David Lejeune
 # Created : 27/09/2016
 # School : Vives
@@ -10,12 +11,6 @@
 # Class : 3PB-ICT
 # Group : 2
 #
-# Task goals
-# ----------
-# Manage an Active Directory on Windows Server 2012 R2
-# 1)Bulk create users based on csv (OK)
-# 2)Update users based on weekly csv updates (TBD)
-
 
 
 #------------------------------------------------------------------------------
@@ -25,7 +20,7 @@ Import-Module ActiveDirectory
 
 #------------------------------------------------------------------------------
 #Script Variables
-$DC1 = "Cynalco"
+$DC1 = "Vives"
 $DC2 = "be"
 
 $Menu = ""
@@ -44,23 +39,17 @@ $Menu99 = "Show Description"
 function Show-Description()
 {
   #feeding the narcistic beast
-  Write-Host "# Description" -ForegroundColor white
-  Write-Host "# -----------" -ForegroundColor white
+  Write-Host "# Description" -ForegroundColor whGroep1e
+  Write-Host "# -----------" -ForegroundColor whGroep1e
   Write-Host "# Active Directory Management tool" -ForegroundColor yellow
-  Write-Host "# Created for Task1 Operating Systems Windows 2 @ Vives" -ForegroundColor yellow
+  Write-Host "# Adapted for the common task Linux/Windows/Networking"
   Write-Host ""
   Write-Host "# Author : David Lejeune" -ForegroundColor magenta
   Write-Host "# Created : 27/09/2016" -ForegroundColor magenta
   Write-Host "# School : Vives" -ForegroundColor magenta
   Write-Host "# Course : Operating Systems Windows 2" -ForegroundColor magenta
   Write-Host "# Class : 3PB-ICT" -ForegroundColor magenta
-  Write-Host "# Group : 2" -ForegroundColor magenta
-  Write-Host ""
-  Write-Host "# Task goals" -ForegroundColor red
   Write-Host "# ----------" -ForegroundColor red
-  Write-Host "# Manage an Active Directory on Windows Server 2012 R2" -ForegroundColor gray
-  Write-Host "# 1)Bulk create users based on csv (OK - Tested)" -ForegroundColor darkgreen
-  Write-Host "# 2)Update users based on weekly csv updates (1/2 OK - TBTested)" -ForegroundColor darkcyan
   Write-Host ""
 }
 
@@ -68,7 +57,7 @@ function Create-OU()
 {
     #create top level OU (needs to worked out further for depth)
     $OUname = Read-Host -Prompt '> OU name ';
-    New-ADOrganizationalUnit $OUname ;
+    New-ADOrganizationalUnGroep1 $OUname ;
 }
 
 function Create-User()
@@ -79,9 +68,9 @@ function Create-User()
     $Displayname = $UserFirstname + " " + $UserLastname;
     $SAM = Read-Host -Prompt '> SAM account name ';
     $UserpathOU = Read-Host -Prompt '> OU ';
-    $UPN = "$($SAM)@Cynalco.be"
-    $pathOU = "ou=$($UserpathOU),ou=CMAfdelingen,dc=Cynalco,dc=be"
-    New-ADUser -Department:"$($UserpathOU)" -DisplayName:"$($Displayname)" -GivenName:"$($UserFirstname)" -Name:"$($Displayname)" -Path:"OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -SamAccountName:"$($SAM)" -Server:"CrispyMcBacon.Cynalco.be" -Surname:"$($UserLastname)" -Type:"user" -UserPrincipalName:"$($SAM)@Cynalco.be" -AccountPassword (ConvertTo-SecureString "Password123" -AsPlainText -Force) -Enabled $true
+    $UPN = "$($SAM)@Vives.be"
+    $pathOU = "ou=$($UserpathOU),ou=VivesAfdelingen,dc=Vives,dc=be"
+    New-ADUser -Department:"$($UserpathOU)" -DisplayName:"$($Displayname)" -GivenName:"$($UserFirstname)" -Name:"$($Displayname)" -Path:"OU=$($UserpathOU),OU=VivesAfdelingen,DC=Vives,dc=be" -SamAccountName:"$($SAM)" -Server:"CrispyMcBacon.Vives.be" -Surname:"$($UserLastname)" -Type:"user" -UserPrincipalName:"$($SAM)@Vives.be" -AccountPassword (ConvertTo-SecureString "Password123" -AsPlainText -Force) -Enabled $true
 }
 
 function Delete-User()
@@ -94,7 +83,7 @@ function Delete-User()
     if (dsquery user -samid $SAM)
     {
       "Found user"
-      remove-aduser -identity $SAM #-confirm:$false
+      remove-aduser -identGroep1y $SAM #-confirm:$false
       Show-Users
       if (dsquery user -samid $SAM){"User unsuccesfully deleted"}
       else {"User succesfully deleted"}
@@ -109,8 +98,8 @@ function Show-Users()
 {
     $sw = [Diagnostics.Stopwatch]::StartNew()
     #log users and show them
-    Get-ADUser -SearchBase "OU=CMAfdelingen,dc=Cynalco,dc=be" -Filter * -properties * -ResultSetSize 5000 | select identity ,CN ,SAMAccountName, Department, Description , Title,UserPrincipalName, DistinguishedName, HomeDirectory, ProfilePath, Office, OfficePhone, Manager    | convertto-html | out-file ADUsers.html
-    Get-ADUser -SearchBase "dc=Cynalco,dc=be" -Filter * -properties * -ResultSetSize 5000 | select DistinguishedName,SAMAccountName, Department | format-table -autosize
+    Get-ADUser -SearchBase "OU=VivesAfdelingen,dc=Vives,dc=be" -Filter * -properties * -ResultSetSize 5000 | select identGroep1y ,CN ,SAMAccountName, Department, Description , TGroep1le,UserPrincipalName, DistinguishedName, HomeDirectory, ProfilePath, Office, OfficePhone, Manager    | convertto-html | out-file ADUsers.html
+    Get-ADUser -SearchBase "dc=Vives,dc=be" -Filter * -properties * -ResultSetSize 5000 | select DistinguishedName,SAMAccountName, Department | format-table -autosize
 }
 
 function Check-UserExistence()
@@ -126,11 +115,11 @@ function Bulk-UserDelete()
   $sw = [Diagnostics.Stopwatch]::StartNew()
 
   #import data
-  $Users = Import-Csv -Delimiter ";" -Path "personeel.csv"
+  $Users = Import-Csv -Delimiter ";" -Path "Users.csv"
 
   #header of table
   Write-Host "Get ready for the magic ...`n" -ForegroundColor Gray
-  Write-Host "Deleting users`n" -ForegroundColor white
+  Write-Host "Deleting users`n" -ForegroundColor whGroep1e
   Write-Host "SAM      `tExists?      `t`tAction     `t`t`tOU" -ForegroundColor Yellow
   Write-Host "---      `t-------   `t`t------     `t`t`t--" -ForegroundColor Yellow
 
@@ -143,54 +132,46 @@ function Bulk-UserDelete()
       $UserLastname = $User.Voornaam
       $UserAccount = $User.Account
       $SAM = $UserAccount
-      $UPN = "$($SAM)@Cynalco.be"
+      $UPN = "$($SAM)@Vives.be"
       $OU = ""
       $DistinguishedName = "CN=" + $Displayname + ","
 
       #find the department
-      $Manager = $User.Manager
-      $IT = $User.IT
-      $Boekhouding =  $User.Boekhouding
-      $Logistiek = $User.Logistiek
-      $ImportExport = $User.ImportExport
+      $Groep1 = $User.Groep1
+      $Groep2 =  $User.Groep2
+      $Groep3 = $User.Groep3
+      $Groep4 = $User.Groep4
       $UserpathOU = ""
 
-      if ($Manager -eq "X")
-      {
-        $UserpathOU = "Management"
-        $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
-      }
-      else
-      {
-          if ($ImportExport -eq "X")
+          if ($Groep4 -eq "X")
           {
-            $UserpathOU = "ImportExport"
+            $UserpathOU = "Groep4"
             $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
           }
-          if ($Logistiek -eq "X")
+          if ($Groep3 -eq "X")
           {
-            $UserpathOU = "Logistiek"
+            $UserpathOU = "Groep3"
             $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
           }
-          if ($Boekhouding -eq "X")
+          if ($Groep2 -eq "X")
           {
-            $UserpathOU = "Boekhouding"
+            $UserpathOU = "Groep2"
             $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
           }
-          if ($IT -eq "X")
+          if ($Groep1 -eq "X")
           {
-            $UserpathOU = "IT"
+            $UserpathOU = "Groep1"
             $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
           }
-      }
-      $DistinguishedName = "$($DistinguishedName)OU=CMAfdelingen,DC=Cynalco,dc=be,"
+
+      $DistinguishedName = "$($DistinguishedName)OU=VivesAfdelingen,DC=Vives,dc=be,"
 
         $Result = ""
         $Result2 = ""
         if (dsquery user -samid $SAM)
         {
           $Result = "User Found"
-          remove-aduser -identity $SAM -confirm:$false
+          remove-aduser -identGroep1y $SAM -confirm:$false
 
           #Check after deletion if user exists now
           if (dsquery user -samid $SAM)
@@ -222,11 +203,11 @@ function Bulk-UserManagement()
   #main task
   #create users based on csv date
   #import data
-  $Users = Import-Csv -Delimiter ";" -Path "personeel.csv"
+  $Users = Import-Csv -Delimiter ";" -Path "Users.csv"
 
   Write-Host "`nCrunching data like a boss"  -ForegroundColor red
   Write-Host "Get ready for the magic ...`n"  -ForegroundColor red
-  Write-Host "Creating users`n" -ForegroundColor white
+  Write-Host "Creating users`n" -ForegroundColor whGroep1e
   Write-Host "SAM      `tExists?      `t`tAction     `t`t`tOU`t`t     `tSubgroup"  -ForegroundColor yellow
   Write-Host "---      `t-------   `t`t------     `t`t`t--`t`t     `t--------" -ForegroundColor yellow
 
@@ -238,48 +219,42 @@ function Bulk-UserManagement()
       $UserLastname = $User.Voornaam
       $UserAccount = $User.Account
       $SAM = $UserAccount
-      $UPN = "$($SAM)@Cynalco.be"
+      $UPN = "$($SAM)@Vives.be"
       $OU = ""
       $DistinguishedName = ""
       $BossName = ""
 
-      $Manager = $User.Manager
-      $IT = $User.IT
-      $Boekhouding =  $User.Boekhouding
-      $Logistiek = $User.Logistiek
-      $ImportExport = $User.ImportExport
+
+      $Groep1 = $User.Groep1
+      $Groep2 =  $User.Groep2
+      $Groep3 = $User.Groep3
+      $Groep4 = $User.Groep4
 
       $UserpathOU = ""
-      if ($Manager -eq "X")
-      {
-        $UserpathOU = "Management"
-        $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
-      }
-      else
-      {
-          if ($ImportExport -eq "X")
-          {
-            $UserpathOU = "ImportExport"
-            $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
-          }
-          if ($Logistiek -eq "X")
-          {
-            $UserpathOU = "Logistiek"
-            $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
-          }
-          if ($Boekhouding -eq "X")
-          {
-            $UserpathOU = "Boekhouding"
-            $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
-          }
-          if ($IT -eq "X")
-          {
-            $UserpathOU = "IT"
-            $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
-          }
-      }
 
-        $DistinguishedName = "$($DistinguishedName)OU=CMAfdelingen,DC=Cynalco,dc=be,"
+          if ($Groep4 -eq "X")
+          {
+            $UserpathOU = "Groep4"
+            $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
+          }
+          if ($Groep3 -eq "X")
+          {
+            $UserpathOU = "Groep3"
+            $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
+          }
+          if ($Groep2 -eq "X")
+          {
+            $UserpathOU = "Groep2"
+            $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
+          }
+          if ($Groep1 -eq "X")
+          {
+            $UserpathOU = "Groep1"
+            $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
+          }
+
+
+        $DistinguishedName = "$($DistinguishedName)OU=VivesAfdelingen,DC=Vives,dc=be,"
 
         $Result = ""
         $Result2 = ""
@@ -289,18 +264,18 @@ function Bulk-UserManagement()
           $Result = "User Found   "
 
           # if user exists remove them from groups and retarget so an update puts them in the correct path
-          $user = "CN=$($UserpathOU),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be"
-          Get-ADPrincipalGroupMembership -Identity $user | where {$_.Name -ne "Domain Users"} | % {Remove-ADPrincipalGroupMembership -Identity $user -MemberOf $_}
+          $user = "CN=$($UserpathOU),OU=$($UserpathOU),OU=VivesAfdelingen,DC=Vives,dc=be"
+          Get-ADPrincipalGroupMembership -IdentGroep1y $user | where {$_.Name -ne "Domain Users"} | % {Remove-ADPrincipalGroupMembership -IdentGroep1y $user -MemberOf $_}
           # retarget to catch updates
-          Get-ADUser $SAM| Move-ADObject -TargetPath "OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be"
+          Get-ADUser $SAM| Move-ADObject -TargetPath "OU=$($UserpathOU),OU=VivesAfdelingen,DC=Vives,dc=be"
           # rename department
           Get-ADUser $SAM| Set-ADUser -Department $UserpathOU
 
           #making sure if a former user (disabled) is found that he is set active again
-          $ActiveUser = Get-ADUser -Identity $SAM
+          $ActiveUser = Get-ADUser -IdentGroep1y $SAM
           if ($ActiveUser.Enabled -eq $False)
           {
-              Enable-ADAccount -Identity $SAM
+              Enable-ADAccount -IdentGroep1y $SAM
               $Result2 =  "Reactivated former user      "
           }
           else{
@@ -314,7 +289,7 @@ function Bulk-UserManagement()
           $Result = "User not found"
 
           #create the user and assign to OU
-          New-ADUser -ChangePasswordAtLogon:$true -Department:"$($UserpathOU)" -DisplayName:"$($Displayname)" -GivenName:"$($UserFirstname)" -Name:"$($Displayname)" -Path:"OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -SamAccountName:"$($SAM)" -Server:"CrispyMcBacon.Cynalco.be" -Surname:"$($UserLastname)" -Type:"user" -UserPrincipalName:"$($SAM)@Cynalco.be" -AccountPassword (ConvertTo-SecureString "Password123" -AsPlainText -Force) -Enabled $true
+          New-ADUser -ChangePasswordAtLogon:$true -Department:"$($UserpathOU)" -DisplayName:"$($Displayname)" -GivenName:"$($UserFirstname)" -Name:"$($Displayname)" -Path:"OU=$($UserpathOU),OU=VivesAfdelingen,DC=Vives,dc=be" -SamAccountName:"$($SAM)" -Server:"CrispyMcBacon.Vives.be" -Surname:"$($UserLastname)" -Type:"user" -UserPrincipalName:"$($SAM)@Vives.be" -AccountPassword (ConvertTo-SecureString "Password123" -AsPlainText -Force) -Enabled $true
 
           #Check after creation if user exists now
           if (dsquery user -samid $SAM)
@@ -332,129 +307,63 @@ function Bulk-UserManagement()
            $UserpathOU = ""
            $Boss = "False"
            $countDepartments = 0
-           if ($Manager -eq "X")
-           {
-             $UserpathOU = "Management"
-             $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
-             $Boss = "True"
-             Set-ADGroup -Add:@{'Member'="CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be"} -Identity:"CN=$($UserpathOU),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-           }
-           else
-           {
-               if ($ImportExport -eq "X")
+
+               if ($Groep4 -eq "X")
                {
-                 $UserpathOU = "ImportExport"
+                 $UserpathOU = "Groep4"
                  $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
                  $countDepartments = $countDepartments + 1
                }
-               if ($Logistiek -eq "X")
+               if ($Groep3 -eq "X")
                {
-                 $UserpathOU = "Logistiek"
+                 $UserpathOU = "Groep3"
                  $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
                  $countDepartments = $countDepartments + 1
                }
-               if ($Boekhouding -eq "X")
+               if ($Groep2 -eq "X")
                {
-                 $UserpathOU = "Boekhouding"
+                 $UserpathOU = "Groep2"
                  $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
                  $countDepartments = $countDepartments + 1
                }
-               if ($IT -eq "X")
+               if ($Groep1 -eq "X")
                {
-                 $UserpathOU = "IT"
+                 $UserpathOU = "Groep1"
                  $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
                  $countDepartments = $countDepartments + 1
                }
-               Set-ADGroup -Add:@{'Member'="CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be"} -Identity:"CN=$($UserpathOU),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-           }
+               Set-ADGroup -Add:@{'Member'="CN=$($Displayname),OU=$($UserpathOU),OU=VivesAfdelingen,DC=Vives,dc=be"} -IdentGroep1y:"CN=$($UserpathOU),OU=$($UserpathOU),OU=VivesAfdelingen,DC=Vives,dc=be" -Server:"CrispyMcBacon.Vives.be"
+
 
            #assigning to possible (sub) groups
            $UserpathOU = ""
            $Boss = "False"
            $SubOU = ""
-           if ($Manager -eq "X")
-           {
-             $UserpathOU = "Management"
-             $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
-             $Boss = "True"
-             Add-ADPrincipalGroupMembership -Identity:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -MemberOf:"CN=$($UserpathOU),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-             $countDepartments = $countDepartments + 1
 
-             if ($ImportExport -eq "X")
-             {
-               $SubOU = "ImportExport"
-               $DistinguishedName = "OU=$($UserpathOU),"
-               Add-ADPrincipalGroupMembership -Identity:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -MemberOf:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-               $countDepartments = $countDepartments + 1
-               #Set-ADGroup -Identity:"CN=Manager,OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -ManagedBy:"CN=Bert Laplasse,OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-               Set-ADGroup -Identity:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -ManagedBy:"CN=$($Displayname),OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-             }
-             if ($Logistiek -eq "X")
-             {
-               $SubOU = "Logistiek"
-               $DistinguishedName = "OU=$($UserpathOU),"
-               Add-ADPrincipalGroupMembership -Identity:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -MemberOf:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-               $countDepartments = $countDepartments + 1
-               Set-ADGroup -Identity:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -ManagedBy:"CN=$($Displayname),OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-             }
-             if ($Boekhouding -eq "X")
-             {
-               $SubOU = "Boekhouding"
-               $DistinguishedName = "OU=$($UserpathOU),"
-               Add-ADPrincipalGroupMembership -Identity:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -MemberOf:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-               $countDepartments = $countDepartments + 1
-               Set-ADGroup -Identity:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -ManagedBy:"CN=$($Displayname),OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-             }
-             if ($IT -eq "X")
-             {
-               $SubOU = "IT"
-               $DistinguishedName = "OU=$($UserpathOU),"
-               Add-ADPrincipalGroupMembership -Identity:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -MemberOf:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-               $countDepartments = $countDepartments + 1
-               Set-ADGroup -Identity:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -ManagedBy:"CN=$($Displayname),OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-             }
-           }
-           else
-           {
-
-               if ($ImportExport -eq "X")
+               if ($Groep4 -eq "X")
                {
-                 $UserpathOU = "ImportExport"
+                 $UserpathOU = "Groep4"
                  $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
                }
-               if ($Logistiek -eq "X")
+               if ($Groep3 -eq "X")
                {
-                 $UserpathOU = "Logistiek"
+                 $UserpathOU = "Groep3"
                  $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
                }
-               if ($Boekhouding -eq "X")
+               if ($Groep2 -eq "X")
                {
-                 $UserpathOU = "Boekhouding"
+                 $UserpathOU = "Groep2"
                  $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
                }
-               if ($IT -eq "X")
+               if ($Groep1 -eq "X")
                {
-                 $UserpathOU = "IT"
+                 $UserpathOU = "Groep1"
                  $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
                }
-               Add-ADPrincipalGroupMembership -Identity:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -MemberOf:"CN=$($UserpathOU),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-           }
+               Add-ADPrincipalGroupMembership -IdentGroep1y:"CN=$($Displayname),OU=$($UserpathOU),OU=VivesAfdelingen,DC=Vives,dc=be" -MemberOf:"CN=$($UserpathOU),OU=$($UserpathOU),OU=VivesAfdelingen,DC=Vives,dc=be" -Server:"CrispyMcBacon.Vives.be"
 
-           #used to see if the big boss exists ($boss true and count 1)
-           if ($Manager -eq "X")
-           {
-             if ($countDepartments -eq 1)
-               {
-                 $SubOU = "Management"
-                 Set-ADGroup -Identity:"CN=$($UserpathOU),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -ManagedBy:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-                 #Set-ADUser -Identity:"CN=Linda Hombroeckx,OU=Logistiek,OU=CMAfdelingen,DC=Cynalco,dc=be" -Replace:'manager'="CN=Bert Laplasse,OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-                 #Set-ADUser -Identity:"CN=Linda Hombroeckx,OU=Logistiek,OU=CMAfdelingen,DC=Cynalco,dc=be" -Manager:$null -Server:"CrispyMcBacon.Cynalco.be"
-                 #Get-ADUser -SearchBase "OU=$($UserpathOU),dc=Cynalco,dc=be" -Filter * -ResultSetSize 5000 | Select Name,SamAccountName
-                 #Write-Host "Setting manager $($Displayname) for users in $($SubOU) "
-                 #Get-ADUser -SearchBase "OU=$($UserpathOU),OU=CMAfdelingen,dc=Cynalco,dc=be" -Filter * -properties * -ResultSetSize 5000 | select SAMAccountName # Set-ADUser -Identity:"CN=Linda Hombroeckx,OU=Logistiek,OU=CMAfdelingen,DC=Cynalco,dc=be" -Manager:$null -Server:"CrispyMcBacon.Cynalco.be"
 
-               }
-           }
+
          # END OF BLOCK THAT HELPS DISPLAY ALL THE BEAUTIFUL STUFF for new users
          ##################################################################
         }
@@ -472,12 +381,12 @@ function Bulk-UserManagement()
   Write-Host " *** Finished creating new users and adding them to the correct OU *** `n"-ForegroundColor blue
   Clear-Groups
   Set-Group
-  Set-Manager
+
 }
 
 function Remove-GroupMembershipDL()
 {
-  $SearchBase = "OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be"
+  $SearchBase = "OU=$($UserpathOU),OU=VivesAfdelingen,DC=Vives,dc=be"
   $Users = Get-ADUser -filter * -SearchBase $SearchBase -Properties MemberOf
   ForEach($User in $Users){
       if ($User.Enabled -eq $True) {
@@ -494,31 +403,31 @@ function Remove-GroupMembershipDL()
 
 function Clear-Groups()
 {
-  Write-Host "Removing all active users from groups" -ForegroundColor white;
+  Write-Host "Removing all active users from groups" -ForegroundColor whGroep1e;
   Write-Host "" -ForegroundColor yellow;
 
-  #Choose Organizational Unit
+  #Choose Organizational UnGroep1
   $Count=0
-  $UserpathOU="IT"
+  $UserpathOU="Groep1"
   Remove-GroupMembershipDL
 
-  #Choose Organizational Unit
+  #Choose Organizational UnGroep1
   $Count=0
-  $UserpathOU="Boekhouding"
+  $UserpathOU="Groep2"
   Remove-GroupMembershipDL
 
-  #Choose Organizational Unit
+  #Choose Organizational UnGroep1
   $Count=0
-  $UserpathOU="Logistiek"
+  $UserpathOU="Groep3"
   Remove-GroupMembershipDL
 
-  #Choose Organizational Unit
+  #Choose Organizational UnGroep1
   $Count=0
-  $UserpathOU="ImportExport"
+  $UserpathOU="Groep4"
   Remove-GroupMembershipDL
 
 
-  #Choose Organizational Unit
+  #Choose Organizational UnGroep1
   $Count=0
   $UserpathOU="Management"
   Remove-GroupMembershipDL
@@ -532,9 +441,9 @@ function Clear-Groups()
 function Set-Group()
 {
   #import data
-  $Users = Import-Csv -Delimiter ";" -Path "personeel.csv"
+  $Users = Import-Csv -Delimiter ";" -Path "Users.csv"
 
-  Write-Host "Setting Group(s) for users`n" -ForegroundColor white
+  Write-Host "Setting Group(s) for users`n" -ForegroundColor whGroep1e
   Write-Host "SAM      `tGroup/OU     `t`tSubgroup" -ForegroundColor yellow
   Write-Host "---      `t--------     `t`t--------" -ForegroundColor yellow
   #loop through all users
@@ -545,18 +454,18 @@ function Set-Group()
       $UserLastname = $User.Voornaam
       $UserAccount = $User.Account
       $SAM = $UserAccount
-      $UPN = "$($SAM)@Cynalco.be"
+      $UPN = "$($SAM)@Vives.be"
       $OU = ""
       $DistinguishedName = ""
       $BossName = ""
 
-      $Manager = $User.Manager
-      $IT = $User.IT
-      $Boekhouding =  $User.Boekhouding
-      $Logistiek = $User.Logistiek
-      $ImportExport = $User.ImportExport
 
-      $DistinguishedName = "$($DistinguishedName)OU=CMAfdelingen,DC=POLIFORMA,dc=be,"
+      $Groep1 = $User.Groep1
+      $Groep2 =  $User.Groep2
+      $Groep3 = $User.Groep3
+      $Groep4 = $User.Groep4
+
+      $DistinguishedName = "$($DistinguishedName)OU=VivesAfdelingen,DC=POLIFORMA,dc=be,"
 
         $Result = ""
         $Result2 = ""
@@ -570,135 +479,62 @@ function Set-Group()
           $Boss = "False"
           $countDepartments = 0
 
-          if ($Manager -eq "X")
-          {
-            $UserpathOU = "Management"
-            $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
-            $Boss = "True"
-            Set-ADGroup -Add:@{'Member'="CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be"} -Identity:"CN=$($UserpathOU),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-            $Result = $UserpathOU
-          }
-          else
-          {
-              if ($ImportExport -eq "X")
+
+              if ($Groep4 -eq "X")
               {
-                $UserpathOU = "ImportExport"
+                $UserpathOU = "Groep4"
                 $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
                 $countDepartments = $countDepartments + 1
               }
-              if ($Logistiek -eq "X")
+              if ($Groep3 -eq "X")
               {
-                $UserpathOU = "Logistiek"
+                $UserpathOU = "Groep3"
                 $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
                 $countDepartments = $countDepartments + 1
               }
-              if ($Boekhouding -eq "X")
+              if ($Groep2 -eq "X")
               {
-                $UserpathOU = "Boekhouding"
+                $UserpathOU = "Groep2"
                 $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
                 $countDepartments = $countDepartments + 1
               }
-              if ($IT -eq "X")
+              if ($Groep1 -eq "X")
               {
-                $UserpathOU = "IT"
+                $UserpathOU = "Groep1"
                 $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
                 $countDepartments = $countDepartments + 1
               }
-              Set-ADGroup -Add:@{'Member'="CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be"} -Identity:"CN=$($UserpathOU),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
+              Set-ADGroup -Add:@{'Member'="CN=$($Displayname),OU=$($UserpathOU),OU=VivesAfdelingen,DC=Vives,dc=be"} -IdentGroep1y:"CN=$($UserpathOU),OU=$($UserpathOU),OU=VivesAfdelingen,DC=Vives,dc=be" -Server:"CrispyMcBacon.Vives.be"
               $Result = $UserpathOU
-          }
+
 
           #assigning to possible (sub) groups
           $UserpathOU = ""
           $Boss = "False"
           $SubOU = ""
-          if ($Manager -eq "X")
-          {
-            $UserpathOU = "Management"
-            $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
-            $Boss = "True"
-            Add-ADPrincipalGroupMembership -Identity:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -MemberOf:"CN=$($UserpathOU),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-            $countDepartments = $countDepartments + 1
 
-            if ($ImportExport -eq "X")
-            {
-              $SubOU = "ImportExport"
-              $DistinguishedName = "OU=$($UserpathOU),"
-              Add-ADPrincipalGroupMembership -Identity:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -MemberOf:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-              $countDepartments = $countDepartments + 1
-              #Set-ADGroup -Identity:"CN=Manager,OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -ManagedBy:"CN=Bert Laplasse,OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-              Set-ADGroup -Identity:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -ManagedBy:"CN=$($Displayname),OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-              $Result2 = $SubOU
-            }
-            if ($Logistiek -eq "X")
-            {
-              $SubOU = "Logistiek"
-              $DistinguishedName = "OU=$($UserpathOU),"
-              Add-ADPrincipalGroupMembership -Identity:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -MemberOf:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-              $countDepartments = $countDepartments + 1
-              Set-ADGroup -Identity:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -ManagedBy:"CN=$($Displayname),OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-              $Result2 = $SubOU
-            }
-            if ($Boekhouding -eq "X")
-            {
-              $SubOU = "Boekhouding"
-              $DistinguishedName = "OU=$($UserpathOU),"
-              Add-ADPrincipalGroupMembership -Identity:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -MemberOf:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-              $countDepartments = $countDepartments + 1
-              Set-ADGroup -Identity:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -ManagedBy:"CN=$($Displayname),OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-              $Result2 = $SubOU
-            }
-            if ($IT -eq "X")
-            {
-              $SubOU = "IT       "
-              $DistinguishedName = "OU=$($UserpathOU),"
-              Add-ADPrincipalGroupMembership -Identity:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -MemberOf:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-              $countDepartments = $countDepartments + 1
-              Set-ADGroup -Identity:"CN=$($SubOU),OU=$($SubOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -ManagedBy:"CN=$($Displayname),OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-              $Result2 = $SubOU
-            }
-          }
-          else
-          {
-
-              if ($ImportExport -eq "X")
+              if ($Groep4 -eq "X")
               {
-                $UserpathOU = "ImportExport"
+                $UserpathOU = "Groep4"
                 $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
               }
-              if ($Logistiek -eq "X")
+              if ($Groep3 -eq "X")
               {
-                $UserpathOU = "Logistiek"
+                $UserpathOU = "Groep3"
                 $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
               }
-              if ($Boekhouding -eq "X")
+              if ($Groep2 -eq "X")
               {
-                $UserpathOU = "Boekhouding"
+                $UserpathOU = "Groep2"
                 $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
               }
-              if ($IT -eq "X")
+              if ($Groep1 -eq "X")
               {
-                $UserpathOU = "IT       "
+                $UserpathOU = "Groep1       "
                 $DistinguishedName = "$($DistinguishedName)OU=$($UserpathOU),"
               }
-              Add-ADPrincipalGroupMembership -Identity:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -MemberOf:"CN=$($UserpathOU),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-          }
+              Add-ADPrincipalGroupMembership -IdentGroep1y:"CN=$($Displayname),OU=$($UserpathOU),OU=VivesAfdelingen,DC=Vives,dc=be" -MemberOf:"CN=$($UserpathOU),OU=$($UserpathOU),OU=VivesAfdelingen,DC=Vives,dc=be" -Server:"CrispyMcBacon.Vives.be"
 
-          #used to see if the big boss exists ($boss true and count 1)
-          if ($Manager -eq "X")
-          {
-            if ($countDepartments -eq 1)
-              {
-                $SubOU = "Management"
-                Set-ADGroup -Identity:"CN=$($UserpathOU),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -ManagedBy:"CN=$($Displayname),OU=$($UserpathOU),OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-                #Set-ADUser -Identity:"CN=Linda Hombroeckx,OU=Logistiek,OU=CMAfdelingen,DC=Cynalco,dc=be" -Replace:'manager'="CN=Bert Laplasse,OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-                #Set-ADUser -Identity:"CN=Linda Hombroeckx,OU=Logistiek,OU=CMAfdelingen,DC=Cynalco,dc=be" -Manager:$null -Server:"CrispyMcBacon.Cynalco.be"
-                #Get-ADUser -SearchBase "OU=$($UserpathOU),dc=Cynalco,dc=be" -Filter * -ResultSetSize 5000 | Select Name,SamAccountName
-                #Write-Host "Setting manager $($Displayname) for users in $($SubOU) "
-                #Get-ADUser -SearchBase "OU=$($UserpathOU),OU=CMAfdelingen,dc=Cynalco,dc=be" -Filter * -properties * -ResultSetSize 5000 | select SAMAccountName # Set-ADUser -Identity:"CN=Linda Hombroeckx,OU=Logistiek,OU=CMAfdelingen,DC=Cynalco,dc=be" -Manager:$null -Server:"CrispyMcBacon.Cynalco.be"
-
-              }
-          }
     }
         Write-Host "$($SAM)      `t$($Result)  `t`t$($Result2)"  -ForegroundColor DarkGreen
   }
@@ -711,18 +547,18 @@ function Remove-UnfoundUser()
 {
 
     #import data
-    $Users = Import-Csv -Delimiter ";" -Path "personeel.csv"
+    $Users = Import-Csv -Delimiter ";" -Path "Users.csv"
 
-    Write-Host "Disabling users not found in CSV`n" -ForegroundColor white
+    Write-Host "Disabling users not found in CSV`n" -ForegroundColor whGroep1e
     Write-Host "SAM           `t`t`tAction" -ForegroundColor yellow
     Write-Host "---           `t`t`t------" -ForegroundColor yellow
 
 
-    $usersAD = Get-ADUser -SearchBase "ou=CMAfdelingen,dc=Cynalco,dc=be" -filter *
+    $usersAD = Get-ADUser -SearchBase "ou=VivesAfdelingen,dc=Vives,dc=be" -filter *
      ForEach($userAD in $usersAD)
         {
           $SAM_AD = $userAD.SAMAccountName
-          $UsersCSV = Import-Csv -Delimiter ";" -Path "personeel.csv"
+          $UsersCSV = Import-Csv -Delimiter ";" -Path "Users.csv"
           $found=$false
           #loop through all users
               foreach ($User in $UsersCSV)
@@ -744,11 +580,11 @@ function Remove-UnfoundUser()
               {
                 if (dsquery user -samid $SAM_AD)
                 {
-                  $ActiveUser = Get-ADUser -Identity $SAM_AD
+                  $ActiveUser = Get-ADUser -IdentGroep1y $SAM_AD
                   if ($ActiveUser.Enabled -eq $True)
                   {
                     $Result  = "User remains active"
-                    Write-host $SAM_AD"     `t`t`t"$Result -ForegroundColor white
+                    Write-host $SAM_AD"     `t`t`t"$Result -ForegroundColor whGroep1e
                   }
                   else
                   {
@@ -765,15 +601,15 @@ function Remove-UnfoundUser()
               }
               else
               {
-                $ActiveUser = Get-ADUser -Identity $SAM_AD
+                $ActiveUser = Get-ADUser -IdentGroep1y $SAM_AD
                 if ($ActiveUser.Enabled -eq $True)
                 {
-                    Disable-ADaccount -identity $SAM_AD
+                    Disable-ADaccount -identGroep1y $SAM_AD
                     $Result  = "User has been disabled"
                     Write-host $SAM_AD"     `t`t`t"$Result -ForegroundColor  Red
                 }
                 else{
-                    Disable-ADaccount -identity $SAM_AD
+                    Disable-ADaccount -identGroep1y $SAM_AD
                     $Result  = "User remains disabled"
                     Write-host $SAM_AD"     `t`t`t"$Result -ForegroundColor  Green
 
@@ -791,17 +627,17 @@ function Remove-UnfoundUser()
 function Set-Manager()
 {
   #import data
-  $Users = Import-Csv -Delimiter ";" -Path "personeel.csv"
+  $Users = Import-Csv -Delimiter ";" -Path "Users.csv"
 
-  Write-Host "Setting manager for users in OU's`n" -ForegroundColor white
+  Write-Host "Setting manager for users in OU's`n" -ForegroundColor whGroep1e
   Write-Host "SAM      `tManager of   `t`t`tAction" -ForegroundColor yellow
   Write-Host "---      `t----------   `t`t`t------" -ForegroundColor yellow
 
   $manManager = ""
-  $manIT = ""
-  $manBoekhouding = ""
-  $manImportExport = ""
-  $manLogistiek = ""
+  $manGroep1 = ""
+  $manGroep2 = ""
+  $manGroep4 = ""
+  $manGroep3 = ""
 
   #loop through all users
   foreach ($User in $Users)
@@ -811,19 +647,19 @@ function Set-Manager()
       $UserLastname = $User.Voornaam
       $UserAccount = $User.Account
       $SAM = $UserAccount
-      $UPN = "$($SAM)@Cynalco.be"
+      $UPN = "$($SAM)@Vives.be"
       $OU = ""
       $DistinguishedName = ""
       $BossName = ""
 
       $Manager = $User.Manager
-      $IT = $User.IT
-      $Boekhouding =  $User.Boekhouding
-      $Logistiek = $User.Logistiek
-      $ImportExport = $User.ImportExport
+      $Groep1 = $User.Groep1
+      $Groep2 =  $User.Groep2
+      $Groep3 = $User.Groep3
+      $Groep4 = $User.Groep4
 
       $UserpathOU = ""
-      $DistinguishedName = "$($DistinguishedName)OU=CMAfdelingen,DC=POLIFORMA,dc=be,"
+      $DistinguishedName = "$($DistinguishedName)OU=VivesAfdelingen,DC=POLIFORMA,dc=be,"
 
         $Result = ""
         $Result2 = ""
@@ -839,46 +675,46 @@ function Set-Manager()
             $Boss = "True"
             $countDepartments = $countDepartments + 1
 
-            if ($ImportExport -eq "X")
-            {  
-              $SubOU = "ImportExport"
+            if ($Groep4 -eq "X")
+            {
+              $SubOU = "Groep4"
               $DistinguishedName = "OU=$($UserpathOU),"
               $countDepartments = $countDepartments + 1
-              #Set-ADGroup -Identity:"CN=Manager,OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -ManagedBy:"CN=Bert Laplasse,OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-              $manImportExport = $Displayname
-              Get-ADUser -SearchBase "OU=$($SubOU),OU=CMAfdelingen,dc=Cynalco,dc=be" -Filter * -properties * -ResultSetSize 5000 | Set-ADUser  -Manager "$($SAM)" #-Identity:"$($_.SAMAccountName)" -Manager  #-Server:"CrispyMcBacon.Cynalco.be"
+              #Set-ADGroup -IdentGroep1y:"CN=Manager,OU=Management,OU=VivesAfdelingen,DC=Vives,dc=be" -ManagedBy:"CN=Bert Laplasse,OU=Management,OU=VivesAfdelingen,DC=Vives,dc=be" -Server:"CrispyMcBacon.Vives.be"
+              $manGroep4 = $Displayname
+              Get-ADUser -SearchBase "OU=$($SubOU),OU=VivesAfdelingen,dc=Vives,dc=be" -Filter * -properties * -ResultSetSize 5000 | Set-ADUser  -Manager "$($SAM)" #-IdentGroep1y:"$($_.SAMAccountName)" -Manager  #-Server:"CrispyMcBacon.Vives.be"
               $Result = "    `tSet as manager for all users in OU"
             }
 
-            if ($Logistiek -eq "X")
+            if ($Groep3 -eq "X")
             {
-              $SubOU = "Logistiek"
+              $SubOU = "Groep3"
               $DistinguishedName = "OU=$($UserpathOU),"
               $countDepartments = $countDepartments + 1
-              $manLogistiek = $Displayname
-              Get-ADUser -SearchBase "OU=$($SubOU),OU=CMAfdelingen,dc=Cynalco,dc=be" -Filter * -properties * -ResultSetSize 5000 | Set-ADUser  -Manager "$($SAM)" #-Identity:"$($_.SAMAccountName)" -Manager  #-Server:"CrispyMcBacon.Cynalco.be"
+              $manGroep3 = $Displayname
+              Get-ADUser -SearchBase "OU=$($SubOU),OU=VivesAfdelingen,dc=Vives,dc=be" -Filter * -properties * -ResultSetSize 5000 | Set-ADUser  -Manager "$($SAM)" #-IdentGroep1y:"$($_.SAMAccountName)" -Manager  #-Server:"CrispyMcBacon.Vives.be"
               $Result = "Set as manager for all users in OU"
-                $SubOU = "Logistiek`t"
+                $SubOU = "Groep3`t"
             }
-            if ($Boekhouding -eq "X")
+            if ($Groep2 -eq "X")
             {
-              $SubOU = "Boekhouding"
+              $SubOU = "Groep2"
               $DistinguishedName = "OU=$($UserpathOU),"
               $countDepartments = $countDepartments + 1
-              $manBoekhouding = $Displayname
-              Get-ADUser -SearchBase "OU=$($SubOU),OU=CMAfdelingen,dc=Cynalco,dc=be" -Filter * -properties * -ResultSetSize 5000 | Set-ADUser  -Manager "$($SAM)" #-Identity:"$($_.SAMAccountName)" -Manager  #-Server:"CrispyMcBacon.Cynalco.be"
+              $manGroep2 = $Displayname
+              Get-ADUser -SearchBase "OU=$($SubOU),OU=VivesAfdelingen,dc=Vives,dc=be" -Filter * -properties * -ResultSetSize 5000 | Set-ADUser  -Manager "$($SAM)" #-IdentGroep1y:"$($_.SAMAccountName)" -Manager  #-Server:"CrispyMcBacon.Vives.be"
               $Result = "Set as manager for all users in OU"
-                $SubOU = "Boekhouding`t"
+                $SubOU = "Groep2`t"
             }
-            if ($IT -eq "X")
-            {   
-              $SubOU = "IT"
+            if ($Groep1 -eq "X")
+            {
+              $SubOU = "Groep1"
               $DistinguishedName = "OU=$($UserpathOU),"
               $countDepartments = $countDepartments + 1
-              $manIT = $Displayname
-              Get-ADUser -SearchBase "OU=$($SubOU),OU=CMAfdelingen,dc=Cynalco,dc=be" -Filter * -properties * -ResultSetSize 5000 | Set-ADUser  -Manager "$($SAM)" #-Identity:"$($_.SAMAccountName)" -Manager  #-Server:"CrispyMcBacon.Cynalco.be"
+              $manGroep1 = $Displayname
+              Get-ADUser -SearchBase "OU=$($SubOU),OU=VivesAfdelingen,dc=Vives,dc=be" -Filter * -properties * -ResultSetSize 5000 | Set-ADUser  -Manager "$($SAM)" #-IdentGroep1y:"$($_.SAMAccountName)" -Manager  #-Server:"CrispyMcBacon.Vives.be"
               $Result = "Set as manager for all users in OU"
-                $SubOU = "IT         `t"
+                $SubOU = "Groep1         `t"
             }
           }
           else
@@ -891,12 +727,12 @@ function Set-Manager()
               {
                 $SubOU = "Management"
                 $manManager = $Displayname
-                #Set-ADUser -Identity:"CN=Linda Hombroeckx,OU=Logistiek,OU=CMAfdelingen,DC=Cynalco,dc=be" -Replace:'manager'="CN=Bert Laplasse,OU=Management,OU=CMAfdelingen,DC=Cynalco,dc=be" -Server:"CrispyMcBacon.Cynalco.be"
-                #Set-ADUser -Identity:"CN=Linda Hombroeckx,OU=Logistiek,OU=CMAfdelingen,DC=Cynalco,dc=be" -Manager:$null -Server:"CrispyMcBacon.Cynalco.be"
-                #Get-ADUser -SearchBase "OU=$($UserpathOU),dc=Cynalco,dc=be" -Filter * -ResultSetSize 5000 | Select Name,SamAccountName
+                #Set-ADUser -IdentGroep1y:"CN=Linda Hombroeckx,OU=Groep3,OU=VivesAfdelingen,DC=Vives,dc=be" -Replace:'manager'="CN=Bert Laplasse,OU=Management,OU=VivesAfdelingen,DC=Vives,dc=be" -Server:"CrispyMcBacon.Vives.be"
+                #Set-ADUser -IdentGroep1y:"CN=Linda Hombroeckx,OU=Groep3,OU=VivesAfdelingen,DC=Vives,dc=be" -Manager:$null -Server:"CrispyMcBacon.Vives.be"
+                #Get-ADUser -SearchBase "OU=$($UserpathOU),dc=Vives,dc=be" -Filter * -ResultSetSize 5000 | Select Name,SamAccountName
                 #Write-Host "Setting manager $($Displayname) for users in $($SubOU) "
-                #Get-ADUser -SearchBase "OU=$($UserpathOU),OU=CMAfdelingen,dc=Cynalco,dc=be" -Filter * -properties * -ResultSetSize 5000 | select SAMAccountName # Set-ADUser -Identity:"CN=Linda Hombroeckx,OU=Logistiek,OU=CMAfdelingen,DC=Cynalco,dc=be" -Manager:$null -Server:"CrispyMcBacon.Cynalco.be"
-                Get-ADUser -SearchBase "OU=$($SubOU),OU=CMAfdelingen,dc=Cynalco,dc=be" -Filter * -properties * -ResultSetSize 5000 | Set-ADUser  -Manager "$($SAM)" #-Identity:"$($_.SAMAccountName)" -Manager  #-Server:"CrispyMcBacon.Cynalco.be"
+                #Get-ADUser -SearchBase "OU=$($UserpathOU),OU=VivesAfdelingen,dc=Vives,dc=be" -Filter * -properties * -ResultSetSize 5000 | select SAMAccountName # Set-ADUser -IdentGroep1y:"CN=Linda Hombroeckx,OU=Groep3,OU=VivesAfdelingen,DC=Vives,dc=be" -Manager:$null -Server:"CrispyMcBacon.Vives.be"
+                Get-ADUser -SearchBase "OU=$($SubOU),OU=VivesAfdelingen,dc=Vives,dc=be" -Filter * -properties * -ResultSetSize 5000 | Set-ADUser  -Manager "$($SAM)" #-IdentGroep1y:"$($_.SAMAccountName)" -Manager  #-Server:"CrispyMcBacon.Vives.be"
                 $Result = "Set as manager for all users in OU"
                 $SubOU = "Management`t"
               }
@@ -965,7 +801,7 @@ function Show-Menu()
 #Script
 
 $Host.UI.RawUI.BackgroundColor = ($bckgrnd = 'black')
-$Host.UI.RawUI.ForegroundColor = 'White'
+$Host.UI.RawUI.ForegroundColor = 'WhGroep1e'
 $Host.PrivateData.ErrorForegroundColor = 'Red'
 $Host.PrivateData.ErrorBackgroundColor = $bckgrnd
 $Host.PrivateData.WarningForegroundColor = 'Magenta'
@@ -984,7 +820,7 @@ Show-Menu;
 #Select action
 $Menu = Read-Host -Prompt 'Select an option ';
 $sw = [Diagnostics.Stopwatch]::StartNew()
-switch ($Menu)
+swGroep1ch ($Menu)
     {
         1
           {
